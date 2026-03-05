@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+
 const SIDEBAR_ITEMS = [
   { id: "dashboard", icon: "⊞", label: "Dashboard" },
   { id: "documents", icon: "📄", label: "Documents" },
@@ -8,12 +9,14 @@ const SIDEBAR_ITEMS = [
   { id: "settings", icon: "⚙", label: "Settings" },
 ];
 
+
 const TEMPLATES = ["Modern Professional", "Classic Elegant", "Minimal Clean", "Creative Bold"];
 const CATEGORIES = ["CV", "Cover Letter", "Proposal"];
 const THEMES = ["Modern", "Classic", "Minimal", "Bold"];
 const FONT_FAMILIES = ["Playfair Display", "Georgia", "Garamond", "Lato"];
 const FONT_SIZES = ["10 pt", "11 pt", "12 pt", "14 pt"];
 const COLOR_SCHEMES = ["#1e3a5f", "#3b82f6", "#6366f1", "#0f766e", "#64748b", "#94a3b8", "#cbd5e1"];
+
 
 const sampleCV = {
   name: "Michael Ochieng",
@@ -37,6 +40,7 @@ const sampleCV = {
   ]
 };
 
+
 function SectionHeader({ label, accent, fontSizeNum }) {
   return (
     <div style={{
@@ -54,9 +58,11 @@ function SectionHeader({ label, accent, fontSizeNum }) {
   );
 }
 
+
 function CVPreview({ data, fontFamily, fontSize, accentColor }) {
   const accent = accentColor || "#1e3a5f";
   const fontSizeNum = parseInt(fontSize) || 12;
+
 
   return (
     <div style={{
@@ -80,8 +86,10 @@ function CVPreview({ data, fontFamily, fontSize, accentColor }) {
         </div>
       </div>
 
+
       <SectionHeader label="Summary" accent={accent} fontSizeNum={fontSizeNum} />
       <p style={{ fontSize: fontSizeNum * 0.92, color: "#333", marginBottom: 14, marginTop: 6 }}>{data.summary}</p>
+
 
       <SectionHeader label="Key Skills" accent={accent} fontSizeNum={fontSizeNum} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "8px 0 14px" }}>
@@ -93,6 +101,7 @@ function CVPreview({ data, fontFamily, fontSize, accentColor }) {
           }}>{s}</span>
         ))}
       </div>
+
 
       <SectionHeader label="Professional Experience" accent={accent} fontSizeNum={fontSizeNum} />
       {data.experience.map((exp, i) => (
@@ -113,6 +122,7 @@ function CVPreview({ data, fontFamily, fontSize, accentColor }) {
   );
 }
 
+
 function SelectField({ label, value, onChange, options }) {
   return (
     <div style={{ marginBottom: 10 }}>
@@ -128,6 +138,7 @@ function SelectField({ label, value, onChange, options }) {
   );
 }
 
+
 function InputField({ placeholder, defaultValue }) {
   const [val, setVal] = useState(defaultValue || "");
   return (
@@ -138,6 +149,7 @@ function InputField({ placeholder, defaultValue }) {
     }} />
   );
 }
+
 
 function Dashboard({ onNavigate }) {
   const docs = [
@@ -186,6 +198,7 @@ function Dashboard({ onNavigate }) {
   );
 }
 
+
 function CreateDocument() {
   const [category, setCategory] = useState("CV");
   const [template, setTemplate] = useState("Modern Professional");
@@ -193,6 +206,7 @@ function CreateDocument() {
   const [fontFamily, setFontFamily] = useState("Playfair Display");
   const [fontSize, setFontSize] = useState("12 pt");
   const [accentColor, setAccentColor] = useState("#1e3a5f");
+
 
   return (
     <div style={{ display: "flex", height: "100%", minHeight: 0 }}>
@@ -206,17 +220,21 @@ function CreateDocument() {
           <span style={{ marginLeft: 6, color: "#94a3b8" }}>↺</span>
         </div>
 
+
         <SelectField label="Category" value={category} onChange={setCategory} options={CATEGORIES} />
         <SelectField label="Template" value={template} onChange={setTemplate} options={TEMPLATES} />
+
 
         <div style={{ margin: "16px 0 8px", fontWeight: 700, fontSize: 11, color: "#475569", textTransform: "uppercase", letterSpacing: 1 }}>Prompts</div>
         <InputField placeholder="Full Name" defaultValue="John Doe" />
         <InputField placeholder="Job Title" defaultValue="Mechanical Engineer" />
 
+
         <div style={{ margin: "16px 0 8px", fontWeight: 700, fontSize: 11, color: "#475569", textTransform: "uppercase", letterSpacing: 1 }}>Professional Experience</div>
         <p style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.5, marginBottom: 12 }}>
           Describe your relevant work experience, emphasizing your key achievements and responsibilities in each role.
         </p>
+
 
         <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
           <button style={{
@@ -231,6 +249,7 @@ function CreateDocument() {
           }}>✏ Edit</button>
         </div>
 
+
         <button style={{
           width: "100%", marginTop: 12, background: "#fff",
           border: "1.5px solid #1e3a5f", color: "#1e3a5f",
@@ -239,12 +258,14 @@ function CreateDocument() {
         }}>💾 Save Draft</button>
       </div>
 
+
       {/* Center CV Preview */}
       <div style={{ flex: 1, background: "#f8fafc", overflowY: "auto", padding: "24px 28px" }}>
         <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 4px 24px #0000000d", overflow: "hidden" }}>
           <CVPreview data={sampleCV} fontFamily={fontFamily} fontSize={fontSize} accentColor={accentColor} />
         </div>
       </div>
+
 
       {/* Right Export Panel */}
       <div style={{
@@ -256,9 +277,11 @@ function CreateDocument() {
           <span style={{ cursor: "pointer", color: "#94a3b8", fontSize: 18 }}>×</span>
         </div>
 
+
         <SelectField label="Theme" value={theme} onChange={setTheme} options={THEMES} />
         <SelectField label="Font Family" value={fontFamily} onChange={setFontFamily} options={FONT_FAMILIES} />
         <SelectField label="Font Size" value={fontSize} onChange={setFontSize} options={FONT_SIZES} />
+
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Color Scheme</div>
@@ -274,6 +297,7 @@ function CreateDocument() {
           </div>
         </div>
 
+
         {/* Mini Preview */}
         <div style={{
           border: "1px solid #e2e8f0", borderRadius: 8,
@@ -283,6 +307,7 @@ function CreateDocument() {
             <CVPreview data={sampleCV} fontFamily={fontFamily} fontSize={fontSize} accentColor={accentColor} />
           </div>
         </div>
+
 
         <button style={{
           width: "100%", background: "#16a34a", color: "#fff",
@@ -295,9 +320,11 @@ function CreateDocument() {
   );
 }
 
+
 export default function AdaptDoc() {
   const [activeTab, setActiveTab] = useState("create");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
 
   return (
     <div style={{
@@ -323,6 +350,7 @@ export default function AdaptDoc() {
           {sidebarOpen && <span style={{ color: "#fff", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>AdaptDoc</span>}
         </div>
 
+
         <nav style={{ flex: 1, padding: "12px 8px" }}>
           {SIDEBAR_ITEMS.map(item => (
             <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
@@ -343,6 +371,7 @@ export default function AdaptDoc() {
           ))}
         </nav>
 
+
         <div style={{
           padding: "12px 10px", borderTop: "1px solid #ffffff20",
           display: "flex", alignItems: "center", gap: 10
@@ -355,6 +384,7 @@ export default function AdaptDoc() {
           {sidebarOpen && <span style={{ color: "#93c5fd", fontSize: 12 }}>John Doe</span>}
         </div>
       </div>
+
 
       {/* Main */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -376,6 +406,7 @@ export default function AdaptDoc() {
             <span style={{ cursor: "pointer" }}>⬡</span>
           </div>
         </div>
+
 
         {/* Content */}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -414,3 +445,6 @@ export default function AdaptDoc() {
     </div>
   );
 }
+
+
+
