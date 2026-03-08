@@ -1,258 +1,301 @@
-import { useState, useRef } from "react";
-import ModernProfessional from "./templates/ModernProfessional";
+import React, { useState, useRef, useEffect } from "react";
 
-// \u2500\u2500 icons (inline SVG helpers) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-const Icon = ({ d, size = 16, className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-    className={className}>
-    <path d={d} />
-  </svg>
-);
-const Icons = {
-  home:      "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
-  file:      "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6",
-  layers:    "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
-  settings:  "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z",
-  user:      "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
-  refresh:   "M23 4v6h-6 M1 20v-6h6 M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15",
-  edit:      "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
-  download:  "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3",
-  close:     "M18 6L6 18M6 6l12 12",
-  chevDown:  "M6 9l6 6 6-6",
-  save:      "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8",
-  bell:      "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
-  mail:      "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6",
-  share:     "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13",
-  menu:      "M3 12h18M3 6h18M3 18h18",
-  sparkle:   "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
-};
+const SIDEBAR_ITEMS = [
+  { id: "dashboard", icon: "⊞", label: "Dashboard" },
+  { id: "documents", icon: "📄", label: "Documents" },
+  { id: "create", icon: "✦", label: "Create Document" },
+  { id: "templates", icon: "◧", label: "Templates" },
+  { id: "settings", icon: "⚙", label: "Settings" },
+];
 
-// \u2500\u2500 colour palettes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-const THEMES = {
-  Blue:   { primary: "#1e40af", light: "#dbeafe", accent: "#3b82f6", dark: "#1e3a8a" },
-  Navy:   { primary: "#1e293b", light: "#e2e8f0", accent: "#475569", dark: "#0f172a" },
-  Teal:   { primary: "#0f766e", light: "#ccfbf1", accent: "#14b8a6", dark: "#115e59" },
-  Indigo: { primary: "#4338ca", light: "#e0e7ff", accent: "#6366f1", dark: "#312e81" },
-  Slate:  { primary: "#475569", light: "#f1f5f9", accent: "#64748b", dark: "#1e293b" },
-};
+const TEMPLATES = ["Modern Professional", "Classic Elegant", "Minimal Clean", "Creative Bold"];
+const CATEGORIES = ["CV", "Cover Letter", "Resume", "Portfolio", "Report"];
+const THEMES = ["Modern", "Classic", "Minimal", "Bold"];
+const FONT_FAMILIES = ["Playfair Display", "Georgia", "Garamond", "Lato"];
+const FONT_SIZES = ["10 pt", "11 pt", "12 pt", "14 pt"];
+const COLOR_SCHEMES = ["#1e3a5f", "#3b82f6", "#6366f1", "#0f766e", "#64748b", "#94a3b8", "#cbd5e1"];
 
-const FONTS = ["Playfair Display", "DM Sans", "Fraunces", "Syne", "Outfit", "Lora"];
-const SIZES = ["10 pt", "11 pt", "12 pt", "13 pt", "14 pt"];
-const TEMPLATES = ["Modern Professional", "Executive Bold", "Minimal Clean", "Academic", "Creative Edge", "Modern"];
-
-// \u2500\u2500 sample CV data \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-const INITIAL_CV = {
-  name: "John Doe",
+const defaultCV = {
+  name: "Michael Ochieng",
   title: "Software Engineer",
-  location: "San Francisco, CA",
-  email: "555.555.5555",
-  email2: "hello@email.com",
-  summary: "Versatile software engineer with a track record of building high-impact products and shipping features at scale.",
-  skills: ["Python", "JavaScript (React.js)", "HTML/CSS", "SQL (PostgreSQL, MySQL)"],
-  skillGroups: [
-    { label: "Languages", items: ["Python", "JavaScript (React.js)", "HTML/CSS", "SQL (PostgreSQL, MySQL)"] },
-    { label: "Tools",     items: ["Figma", "Notion", "Jira", "Trello", "Miro", "Google Analytics", "GitHub", "DaVinci Resolve", "OBS"] },
-  ],
+  location: "Nairobi, Kenya",
+  email1: "ochiengmichael082@gmail.com",
+  email2: "michaelochieng@gmail.com",
+  summary: "Accomplished Software Engineer with over 8 years of experience specializing in Machine Learning, Artificial Intelligence, and Web Development. Proven ability in quality control and maintenance across various industrial environments.",
+  skills: ["Machine Learning", "Artificial Intelligence", "Web Development", "Python", "Team Collaboration"],
   experience: [
     {
-      company: "YouTube",
-      role: "Creator (@johndoe)",
-      period: "Aug. 2019 – Present",
-      location: "San Francisco, CA",
+      company: "Tech Solutions Ltd",
+      role: "Lead Software Engineer",
+      period: "Apr 2018 – Present",
       bullets: [
-        "Grew channel to 60k subscribers in 1.5 years; created 80+ videos on tech and productivity",
-        "Conducted A/B testing on titles and thumbnails; increased video impressions by 2.5M in 3 months",
-        "Designed a Notion workflow to streamline video production and roadmapping; boosted productivity by 20%",
-        "Partnered with brands like Skillshare and Squarespace to expand their outreach via sponsorships",
-      ],
-    },
-    {
-      company: "Google Verily",
-      role: "Software Engineer",
-      period: "Aug. 2018 – Sept. 2019",
-      location: "San Francisco, CA",
-      bullets: [
-        "Led front-end development of a dashboard to process 50k blood samples and detect early-stage cancer",
-        "Rebuilt a Quality Control product with input from 20 cross-functional stakeholders, saving $1M annually",
-        "Spearheaded product development of a new lab workflow tool, leading to a 40% increase in efficiency",
-      ],
-    },
-    {
-      company: "Amazon",
-      role: "Software Engineering Intern",
-      period: "May 2017 – Aug. 2017",
-      location: "Seattle, WA",
-      bullets: [
-        "Worked on the Search Customer Experience Team; received a return offer for a full-time position",
-        "Shipped a new feature to 2M+ users to improve the search experience for movie series-related queries",
-        "Built a back-end database service in Java and implemented a front-end UI to support future changes",
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Hyku Consulting",
-      bullets: [
-        "Mentored 15 students towards acceptance at top US boarding schools; achieved 100% success rate",
-        "Designed a collaborative learning ecosystem for students and parents with Trello, Miro, and Google Suite",
-      ],
-    },
-    {
-      name: "Minimal Icon Pack",
-      bullets: [
-        "Designed and released 100+ minimal iOS and Android icons from scratch using Procreate and Figma",
-        "Marketed the product and design process on YouTube; accumulated over $250 in sales on Gumroad",
-      ],
-    },
-    {
-      name: "CommonIntern",
-      bullets: [
-        "Built a Python script to automatically apply to jobs on Glassdoor using BeautifulSoup and Selenium",
-        "500 stars on GitHub; featured on Hackaday; made the front page of r/python and r/programming",
-      ],
-    },
-  ],
-  education: [
-    {
-      school: "Wellesley College",
-      degree: "Bachelor of Arts in Computer Science and Pre-Med",
-      year: "Aug. 2014 – May 2018",
-      location: "Wellesley, MA",
-      coursework: "Data Structures, Algorithms, Databases, Computer Systems, Machine Learning",
-    },
-  ],
+        "Led development of AI-powered web applications serving over 50,000 users monthly.",
+        "Collaborated with cross-functional teams to deliver machine learning models with 95% accuracy.",
+        "Reduced system downtime by 30% through implementing automated monitoring solutions.",
+      ]
+    }
+  ]
 };
 
-// \u2500\u2500 CV Preview Component \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-// ── CV Preview Router ────────────────────────────────────────────────────────
-// Add new templates here — just import and add a case below.
-function CVPreview({ cv, theme, fontFamily, fontSize, template }) {
-  if (template === "Modern Professional" || template === "Modern") {
-    return <ModernProfessional cv={cv} fontFamily={fontFamily} fontSize={fontSize} />;
-  }
-  return <DefaultCVPreview cv={cv} theme={theme} fontFamily={fontFamily} fontSize={fontSize} />;
+function SectionHeader({ label, accent, fontSizeNum }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 8,
+      borderBottom: `2px solid ${accent}`,
+      paddingBottom: 4, marginBottom: 4,
+    }}>
+      <span style={{
+        background: accent, color: "#fff",
+        fontSize: fontSizeNum * 0.8, fontWeight: 700,
+        padding: "1px 6px", borderRadius: 3,
+      }}>AT</span>
+      <span style={{ fontWeight: 700, fontSize: fontSizeNum * 1.05, color: "#111" }}>{label}</span>
+    </div>
+  );
 }
 
-// ── Default CV Preview ───────────────────────────────────────────────────────
-function DefaultCVPreview({ cv, theme, fontFamily, fontSize }) {
-  const t = THEMES[theme] || THEMES.Blue;
-  const fs = parseInt(fontSize) || 12;
+// Editable inline field — shows text normally, becomes input on edit mode
+function EditableField({ value, onChange, editMode, multiline, style }) {
+  const baseStyle = {
+    background: editMode ? "#fffbeb" : "transparent",
+    border: editMode ? "1.5px dashed #f59e0b" : "1.5px solid transparent",
+    borderRadius: 4, padding: editMode ? "2px 6px" : "2px 0",
+    outline: "none", width: "100%", fontFamily: "inherit",
+    resize: "none", transition: "all 0.15s",
+    ...style,
+  };
+
+  if (!editMode) return <span style={{ ...style }}>{value}</span>;
+
+  if (multiline) {
+    return (
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        rows={3}
+        style={{ ...baseStyle, display: "block", lineHeight: 1.5 }}
+      />
+    );
+  }
+  return (
+    <input
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{ ...baseStyle, display: "inline-block" }}
+    />
+  );
+}
+
+function CVPreview({ data, onDataChange, fontFamily, fontSize, accentColor, editMode }) {
+  const accent = accentColor || "#1e3a5f";
+  const fontSizeNum = parseInt(fontSize) || 12;
+
+  const update = (field, value) => onDataChange({ ...data, [field]: value });
+  const updateExp = (expIdx, field, value) => {
+    const exp = data.experience.map((e, i) => i === expIdx ? { ...e, [field]: value } : e);
+    onDataChange({ ...data, experience: exp });
+  };
+  const updateBullet = (expIdx, bulletIdx, value) => {
+    const exp = data.experience.map((e, i) => {
+      if (i !== expIdx) return e;
+      const bullets = e.bullets.map((b, j) => j === bulletIdx ? value : b);
+      return { ...e, bullets };
+    });
+    onDataChange({ ...data, experience: exp });
+  };
+  const updateSkill = (idx, value) => {
+    const skills = data.skills.map((s, i) => i === idx ? value : s);
+    onDataChange({ ...data, skills });
+  };
+  const addSkill = () => onDataChange({ ...data, skills: [...data.skills, "New Skill"] });
+  const removeSkill = (idx) => onDataChange({ ...data, skills: data.skills.filter((_, i) => i !== idx) });
+  const addBullet = (expIdx) => {
+    const exp = data.experience.map((e, i) => i === expIdx ? { ...e, bullets: [...e.bullets, "New achievement"] } : e);
+    onDataChange({ ...data, experience: exp });
+  };
+  const removeBullet = (expIdx, bulletIdx) => {
+    const exp = data.experience.map((e, i) => {
+      if (i !== expIdx) return e;
+      return { ...e, bullets: e.bullets.filter((_, j) => j !== bulletIdx) };
+    });
+    onDataChange({ ...data, experience: exp });
+  };
+
+  const editBorder = editMode ? "1px dashed #f59e0b40" : "none";
 
   return (
     <div style={{
-      fontFamily: `'${fontFamily}', serif`,
-      fontSize: `${fs}px`,
-      lineHeight: 1.5,
-      color: "#1a1a2e",
-      background: "#fff",
-      padding: "28px 32px",
-      minHeight: "600px",
-      boxShadow: "0 2px 24px rgba(0,0,0,0.10)",
-      borderRadius: "6px",
+      fontFamily: `'${fontFamily}', Georgia, serif`,
+      fontSize: `${fontSizeNum}px`,
+      color: "#1a1a2e", background: "#fff",
+      padding: "28px 32px", minHeight: "500px", lineHeight: 1.5,
+      position: "relative",
     }}>
+      {editMode && (
+        <div style={{
+          position: "absolute", top: 8, right: 8,
+          background: "#fef3c7", border: "1px solid #f59e0b",
+          borderRadius: 6, padding: "3px 10px",
+          fontSize: 11, color: "#92400e", fontWeight: 600,
+        }}>✏ Editing Mode — click any field to edit</div>
+      )}
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-        <div>
-          <div style={{ fontSize: `${fs * 2}px`, fontWeight: 700, letterSpacing: "-0.5px", color: "#111" }}>{cv.name}</div>
-          <div style={{ fontSize: `${fs * 1.1}px`, color: t.accent, fontWeight: 500, marginTop: 2 }}>{cv.title}</div>
+        <div style={{ flex: 1 }}>
+          <EditableField
+            value={data.name} onChange={v => update("name", v)}
+            editMode={editMode}
+            style={{ fontSize: fontSizeNum * 1.9, fontWeight: 700, color: "#111", letterSpacing: "-0.5px", width: "100%" }}
+          />
+          <div style={{ marginTop: 2 }}>
+            <EditableField
+              value={data.title} onChange={v => update("title", v)}
+              editMode={editMode}
+              style={{ fontSize: fontSizeNum * 1.05, color: "#555" }}
+            />
+          </div>
         </div>
-        <div style={{ textAlign: "right", fontSize: `${fs * 0.9}px`, color: "#555", marginTop: 4 }}>
-          <div>\ud83d\udccd {cv.location}</div>
-          <div>\u2709 {cv.email2}</div>
-          <div>\u2709 {cv.email}</div>
+        <div style={{ textAlign: "right", fontSize: fontSizeNum * 0.9, color: "#555", minWidth: 180 }}>
+          <div><EditableField value={data.location} onChange={v => update("location", v)} editMode={editMode} style={{ color: "#555", textAlign: "right" }} /></div>
+          <div style={{ marginTop: 4 }}>✉ <EditableField value={data.email1} onChange={v => update("email1", v)} editMode={editMode} style={{ color: "#555" }} /></div>
+          <div>✉ <EditableField value={data.email2} onChange={v => update("email2", v)} editMode={editMode} style={{ color: "#555" }} /></div>
         </div>
       </div>
 
-      {/* Section renderer */}
-      {[
-        { label: "Summary", content: (
-          <p style={{ margin: 0, color: "#333" }}>{cv.summary}</p>
-        )},
-        { label: "Key Skills", content: (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {cv.skills.map(s => (
-              <span key={s} style={{
-                background: t.light, color: t.dark, padding: "2px 10px",
-                borderRadius: 20, fontSize: `${fs * 0.85}px`, fontWeight: 500,
-              }}>{s}</span>
-            ))}
-          </div>
-        )},
-        { label: "Professional Experience", content: (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {cv.experience.map((exp, i) => (
-              <div key={i}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <div style={{ fontWeight: 700, color: "#111" }}>{exp.company}</div>
-                  <div style={{ fontSize: `${fs * 0.85}px`, color: "#777" }}>{exp.period}</div>
-                </div>
-                <div style={{ color: t.accent, fontStyle: "italic", marginBottom: 6, fontSize: `${fs * 0.95}px` }}>{exp.role}</div>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#333" }}>
-                  {exp.bullets.map((b, j) => (
-                    <li key={j} style={{ marginBottom: 4 }}>{b}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )},
-        { label: "Education", content: (
-          <div>
-            {cv.education.map((e, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between" }}>
-                <div>
-                  <span style={{ fontWeight: 700 }}>{e.school}</span>
-                  <span style={{ color: "#555", marginLeft: 8 }}>{e.degree}</span>
-                </div>
-                <div style={{ color: "#777", fontSize: `${fs * 0.9}px` }}>{e.year}</div>
-              </div>
-            ))}
-          </div>
-        )},
-      ].map(sec => (
-        <div key={sec.label} style={{ marginBottom: 18 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            borderBottom: `2px solid ${t.primary}`, paddingBottom: 4, marginBottom: 10,
+      {/* Summary */}
+      <SectionHeader label="Summary" accent={accent} fontSizeNum={fontSizeNum} />
+      <div style={{ marginBottom: 14, marginTop: 6, border: editBorder, borderRadius: 4 }}>
+        <EditableField
+          value={data.summary} onChange={v => update("summary", v)}
+          editMode={editMode} multiline
+          style={{ fontSize: fontSizeNum * 0.92, color: "#333", width: "100%" }}
+        />
+      </div>
+
+      {/* Skills */}
+      <SectionHeader label="Key Skills" accent={accent} fontSizeNum={fontSizeNum} />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "8px 0 14px", border: editBorder, borderRadius: 4, padding: editMode ? 4 : 0 }}>
+        {data.skills.map((s, i) => (
+          <span key={i} style={{
+            background: `${accent}15`, color: accent,
+            border: `1px solid ${accent}40`, borderRadius: 4,
+            padding: "2px 6px", fontSize: fontSizeNum * 0.85,
+            display: "flex", alignItems: "center", gap: 4,
           }}>
-            <div style={{
-              background: t.primary, color: "#fff",
-              fontSize: `${fs * 0.75}px`, fontWeight: 700,
-              padding: "2px 7px", borderRadius: 4, letterSpacing: "0.04em",
-            }}>AI</div>
-            <span style={{ fontWeight: 700, fontSize: `${fs * 1.05}px`, color: t.dark }}>{sec.label}</span>
+            {editMode ? (
+              <>
+                <input
+                  value={s}
+                  onChange={e => updateSkill(i, e.target.value)}
+                  style={{
+                    background: "transparent", border: "none", outline: "none",
+                    color: accent, fontSize: fontSizeNum * 0.85, fontFamily: "inherit",
+                    width: Math.max(60, s.length * 7),
+                  }}
+                />
+                <span onClick={() => removeSkill(i)} style={{ cursor: "pointer", color: "#ef4444", fontWeight: 700, fontSize: 12 }}>×</span>
+              </>
+            ) : s}
+          </span>
+        ))}
+        {editMode && (
+          <button onClick={addSkill} style={{
+            background: `${accent}20`, color: accent, border: `1px dashed ${accent}`,
+            borderRadius: 4, padding: "2px 8px", cursor: "pointer",
+            fontSize: fontSizeNum * 0.85, fontFamily: "inherit"
+          }}>+ Add</button>
+        )}
+      </div>
+
+      {/* Experience */}
+      <SectionHeader label="Professional Experience" accent={accent} fontSizeNum={fontSizeNum} />
+      {data.experience.map((exp, i) => (
+        <div key={i} style={{ marginTop: 10, border: editBorder, borderRadius: 4, padding: editMode ? 6 : 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <EditableField
+              value={exp.company} onChange={v => updateExp(i, "company", v)}
+              editMode={editMode}
+              style={{ fontWeight: 700, fontSize: fontSizeNum }}
+            />
+            <EditableField
+              value={exp.period} onChange={v => updateExp(i, "period", v)}
+              editMode={editMode}
+              style={{ fontSize: fontSizeNum * 0.85, color: "#777", textAlign: "right" }}
+            />
           </div>
-          {sec.content}
+          <div style={{ marginBottom: 6 }}>
+            <EditableField
+              value={exp.role} onChange={v => updateExp(i, "role", v)}
+              editMode={editMode}
+              style={{ color: accent, fontWeight: 600, fontSize: fontSizeNum * 0.92 }}
+            />
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {exp.bullets.map((b, j) => (
+              <li key={j} style={{ fontSize: fontSizeNum * 0.88, color: "#444", marginBottom: 4, display: "flex", alignItems: "flex-start", gap: 4 }}>
+                <EditableField
+                  value={b} onChange={v => updateBullet(i, j, v)}
+                  editMode={editMode} multiline
+                  style={{ fontSize: fontSizeNum * 0.88, color: "#444", flex: 1 }}
+                />
+                {editMode && (
+                  <span onClick={() => removeBullet(i, j)} style={{ cursor: "pointer", color: "#ef4444", fontWeight: 700, fontSize: 14, flexShrink: 0, marginTop: 2 }}>×</span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {editMode && (
+            <button onClick={() => addBullet(i)} style={{
+              marginTop: 6, marginLeft: 18, background: "transparent",
+              border: `1px dashed ${accent}`, color: accent,
+              borderRadius: 4, padding: "2px 10px", cursor: "pointer",
+              fontSize: fontSizeNum * 0.82, fontFamily: "inherit"
+            }}>+ Add bullet</button>
+          )}
         </div>
       ))}
     </div>
   );
 }
 
-// \u2500\u2500 Main App \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-export default function AdaptDoc() {
-  const [activeNav, setActiveNav] = useState("home");
-  const [cv, setCv] = useState(INITIAL_CV);
-  const [prompts, setPrompts] = useState({ name: cv.name, title: cv.title, section: "Professional Experience" });
-  const [theme, setTheme] = useState("Blue");
-  const [fontFamily, setFontFamily] = useState("Playfair Display");
-  const [fontSize, setFontSize] = useState("12 pt");
-  const [template, setTemplate] = useState("Modern Professional");
-  const [category, setCategory] = useState("CV");
-  const [showExport, setShowExport] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      {label && <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>}
+      <select value={value} onChange={e => onChange(e.target.value)} style={{
+        width: "100%", padding: "7px 10px", borderRadius: 7,
+        border: "1px solid #e2e8f0", background: "#f8fafc",
+        fontSize: 12, color: "#1e293b", cursor: "pointer"
+      }}>
+        {options.map(o => <option key={o}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
 
-  const notify = (msg, type = "success") => {
-    setNotification({ msg, type });
-    setTimeout(() => setNotification(null), 2800);
-  };
+function AIChat({ cvData, onCVUpdate }) {
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      text: "Hi! I'm your AI document assistant. Tell me about yourself and I'll help build your CV.\n\nTry saying:\n• \"Change my name to Sarah Kim\"\n• \"Add a skill: Docker\"\n• \"Update my summary to focus on leadership\"\n• \"Add experience at Google as Senior Engineer\"",
+    }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
 
-  const handleRegenerate = async () => {
-    setGenerating(true);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = input.trim();
+    setInput("");
+    setMessages(prev => [...prev, { role: "user", text: userMsg }]);
+    setLoading(true);
+
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -260,271 +303,437 @@ export default function AdaptDoc() {
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: `You are a professional CV writer. Rewrite the Professional Experience section for a person named "${prompts.name}" with the title "${prompts.title}". 
-Keep the same companies (Acme Manufacturing and Delta Precision Works) but improve and vary the bullet points to be more impactful, quantified, and action-oriented.
-Respond ONLY with a JSON object like:
-{"experience": [{"company": "...", "role": "...", "period": "...", "bullets": ["...", "..."]}]}
-No markdown, no explanation, just the JSON.`
-          }]
+          system: `You are an AI assistant helping users build and edit their CV/resume inside AdaptDoc.
+The current CV data is:
+${JSON.stringify(cvData, null, 2)}
+
+When the user asks to update anything, respond with:
+1. A short friendly confirmation message
+2. A JSON block wrapped in <cv_update></cv_update> tags with the FULL updated CV object
+
+The CV object structure must be exactly:
+{
+  "name": string,
+  "title": string,
+  "location": string,
+  "email1": string,
+  "email2": string,
+  "summary": string,
+  "skills": [array of strings],
+  "experience": [{ "company": string, "role": string, "period": string, "bullets": [array of strings] }]
+}
+
+If the user is just chatting or asking questions, respond conversationally without a <cv_update> block.
+Be helpful, concise, and encouraging.`,
+          messages: [{ role: "user", content: userMsg }]
         })
       });
+
       const data = await response.json();
-      const text = data.content?.map(c => c.text || "").join("") || "";
-      const clean = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
-      if (parsed.experience) {
-        setCv(prev => ({ ...prev, ...parsed }));
-        notify("\u2728 CV regenerated successfully!");
+      const fullText = data.content?.map(c => c.text || "").join("") || "Sorry, I could not process that.";
+
+      const cvMatch = fullText.match(/<cv_update>([\s\S]*?)<\/cv_update>/);
+      if (cvMatch) {
+        try {
+          const updated = JSON.parse(cvMatch[1].trim());
+          onCVUpdate(updated);
+        } catch (e) {
+          console.error("Failed to parse CV update", e);
+        }
       }
-    } catch (e) {
-      // Simulate regeneration with slight variation
-      setCv(prev => ({
-        ...prev,
-        summary: `Dynamic ${prompts.title} with a proven track record of driving operational excellence and innovation across high-performance industrial environments. Expert in precision engineering and cross-functional team collaboration.`
-      }));
-      notify("\u2728 CV updated with new content!");
+
+      const displayText = fullText.replace(/<cv_update>[\s\S]*?<\/cv_update>/g, "").trim();
+      setMessages(prev => [...prev, { role: "assistant", text: displayText }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: "assistant", text: "Something went wrong. Please try again." }]);
     }
-    setGenerating(false);
+
+    setLoading(false);
   };
 
-  const handleSaveDraft = () => notify("\ud83d\udcbe Draft saved successfully!");
-
-  const navItems = [
-    { id: "home",     icon: Icons.home },
-    { id: "file",     icon: Icons.file },
-    { id: "layers",   icon: Icons.layers },
-    { id: "user",     icon: Icons.user },
-    { id: "settings", icon: Icons.settings },
-  ];
+  const handleKey = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=Fraunces:wght@400;600;700&family=Syne:wght@400;600;700&family=Outfit:wght@300;400;500;600&family=Lora:wght@400;600;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; }
-        .adaptdoc-root { display: flex; height: 100vh; background: #f0f4f8; overflow: hidden; font-family: 'DM Sans', sans-serif; }
-        
-        /* Sidebar */
-        .sidebar { width: 56px; background: #0f172a; display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; flex-shrink: 0; z-index: 10; }
-        .sidebar-logo { width: 36px; height: 36px; background: #3b82f6; border-radius: 10px; display:flex; align-items:center; justify-content:center; margin-bottom: 12px; font-weight:700; color:#fff; font-size:14px; letter-spacing:-0.5px; }
-        .nav-btn { width: 40px; height: 40px; border-radius: 10px; border:none; background:transparent; color: #94a3b8; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.15s; }
-        .nav-btn:hover { background: #1e293b; color: #e2e8f0; }
-        .nav-btn.active { background: #1e40af; color: #fff; }
-        .nav-bottom { margin-top: auto; display: flex; flex-direction:column; align-items:center; gap:8px; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; cursor:pointer; }
-        
-        /* Main area */
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* Topbar */
-        .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; height: 52px; display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
-        .breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:#64748b; }
-        .breadcrumb span { color:#1e293b; font-weight:500; }
-        .topbar-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
-        .icon-btn { width:32px; height:32px; border-radius:8px; border:none; background:transparent; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
-        .icon-btn:hover { background:#f1f5f9; color:#1e293b; }
-        
-        /* Content */
-        .content { flex:1; display:flex; overflow:hidden; }
-        
-        /* Editor Panel */
-        .editor-panel { width: 260px; background:#fff; border-right:1px solid #e2e8f0; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
-        .panel-section { padding: 16px; border-bottom: 1px solid #f1f5f9; }
-        .panel-label { font-size:11px; font-weight:600; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; }
-        .select-row { display:flex; gap:8px; margin-bottom:12px; }
-        .custom-select { flex:1; padding: 7px 10px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px; color:#334155; background:#f8fafc; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; padding-right:26px; }
-        .custom-select:focus { border-color:#3b82f6; background:#fff; }
-        .prompt-input { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px; color:#334155; outline:none; font-family:'DM Sans',sans-serif; background:#f8fafc; transition:border 0.15s; margin-bottom:8px; }
-        .prompt-input:focus { border-color:#3b82f6; background:#fff; }
-        .section-hint { font-size:12px; color:#94a3b8; line-height:1.5; margin-bottom:12px; }
-        .btn-primary { width:100%; padding:9px; border-radius:9px; border:none; background: linear-gradient(135deg,#1e40af,#3b82f6); color:#fff; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity 0.15s; font-family:'DM Sans',sans-serif; }
-        .btn-primary:hover { opacity:0.9; }
-        .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
-        .btn-secondary { width:100%; padding:8px; border-radius:9px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.15s; font-family:'DM Sans',sans-serif; margin-top:6px; }
-        .btn-secondary:hover { background:#e2e8f0; }
-        .btn-save { width:100%; padding:9px; border-radius:9px; border:none; background:#0f172a; color:#fff; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity 0.15s; font-family:'DM Sans',sans-serif; margin-top:4px; }
-        .btn-save:hover { opacity:0.85; }
-        
-        /* Preview area */
-        .preview-area { flex:1; padding:20px; overflow-y:auto; }
-        .preview-scroll { max-width:680px; margin:0 auto; }
-        
-        /* Export panel */
-        .export-panel { width:260px; background:#fff; border-left:1px solid #e2e8f0; flex-shrink:0; overflow-y:auto; }
-        .export-header { padding:16px 20px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; }
-        .export-title { font-size:15px; font-weight:700; color:#0f172a; }
-        .export-section { padding:16px 20px; border-bottom:1px solid #f1f5f9; }
-        .theme-colors { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-        .theme-chip { width:28px; height:28px; border-radius:7px; cursor:pointer; border:2px solid transparent; transition:all 0.15s; flex-shrink:0; }
-        .theme-chip.active { border-color:#1e293b; transform:scale(1.1); }
-        .mini-preview { border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; margin-top:12px; transform-origin:top center; }
-        .btn-download { width:100%; padding:11px; border-radius:10px; border:none; background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity 0.15s; font-family:'DM Sans',sans-serif; margin:16px 20px; width:calc(100% - 40px); }
-        .btn-download:hover { opacity:0.9; }
-        
-        /* Spinner */
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
-        
-        /* Notification */
-        @keyframes slideIn { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
-        .notification { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:500; z-index:999; animation:slideIn 0.2s ease; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
-        
-        /* Generating pulse */
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .generating { animation: pulse 1s ease-in-out infinite; }
-      `}</style>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: "#475569",
+        textTransform: "uppercase", letterSpacing: 1,
+        marginBottom: 10, display: "flex", alignItems: "center", gap: 6, flexShrink: 0
+      }}>
+        <span style={{ background: "#3b82f6", color: "#fff", borderRadius: 4, padding: "1px 6px", fontSize: 10 }}>AI</span>
+        Document Assistant
+      </div>
 
-      <div className="adaptdoc-root">
-        {/* \u2500\u2500 Sidebar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
-        <div className="sidebar">
-          <div className="sidebar-logo">AT</div>
-          {navItems.map(n => (
-            <button key={n.id} className={`nav-btn ${activeNav === n.id ? "active" : ""}`}
-              onClick={() => setActiveNav(n.id)} title={n.id}>
-              <Icon d={n.icon} size={17} />
+      <div style={{
+        flex: 1, overflowY: "auto", display: "flex",
+        flexDirection: "column", gap: 8, minHeight: 0, paddingRight: 2
+      }}>
+        {messages.map((msg, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+            <div style={{
+              maxWidth: "90%",
+              background: msg.role === "user" ? "#1e3a5f" : "#f1f5f9",
+              color: msg.role === "user" ? "#fff" : "#1e293b",
+              borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+              padding: "8px 11px", fontSize: 11.5,
+              lineHeight: 1.5, whiteSpace: "pre-wrap", wordBreak: "break-word",
+            }}>{msg.text}</div>
+          </div>
+        ))}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+            <div style={{
+              background: "#f1f5f9", borderRadius: "12px 12px 12px 2px",
+              padding: "8px 14px", fontSize: 18, letterSpacing: 2, color: "#94a3b8"
+            }}>···</div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      <div style={{ marginTop: 10, display: "flex", gap: 6, alignItems: "flex-end", flexShrink: 0 }}>
+        <textarea
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="Ask AI to update your CV..."
+          rows={2}
+          style={{
+            flex: 1, padding: "8px 10px", borderRadius: 8,
+            border: "1.5px solid #e2e8f0", background: "#f8fafc",
+            fontSize: 12, color: "#1e293b", resize: "none",
+            fontFamily: "inherit", lineHeight: 1.4, outline: "none",
+          }}
+        />
+        <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
+          background: loading || !input.trim() ? "#cbd5e1" : "#1e3a5f",
+          color: "#fff", border: "none", borderRadius: 8,
+          width: 36, height: 36, cursor: loading ? "not-allowed" : "pointer",
+          fontSize: 16, display: "flex", alignItems: "center",
+          justifyContent: "center", flexShrink: 0, transition: "background 0.15s"
+        }}>➤</button>
+      </div>
+      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 4, textAlign: "center" }}>
+        Enter to send · Shift+Enter for new line
+      </div>
+    </div>
+  );
+}
+
+function CreateDocument() {
+  const [category, setCategory] = useState("CV");
+  const [template, setTemplate] = useState("Modern Professional");
+  const [theme, setTheme] = useState("Modern");
+  const [fontFamily, setFontFamily] = useState("Playfair Display");
+  const [fontSize, setFontSize] = useState("12 pt");
+  const [accentColor, setAccentColor] = useState("#1e3a5f");
+  const [cvData, setCvData] = useState(defaultCV);
+  const [editMode, setEditMode] = useState(false);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+
+      {/* ── Category & Template Top Bar ── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 20,
+        background: "#fff", borderBottom: "1px solid #e2e8f0",
+        padding: "10px 24px", flexShrink: 0,
+      }}>
+        <span style={{ fontSize: 11, color: "#94a3b8", whiteSpace: "nowrap" }}>
+          Dashboard /&nbsp;
+          <span style={{ color: "#1e3a5f", fontWeight: 600 }}>Editing Document</span>
+        </span>
+        <div style={{ flex: 1 }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, whiteSpace: "nowrap" }}>Category</span>
+          <select value={category} onChange={e => setCategory(e.target.value)} style={{
+            padding: "6px 12px", borderRadius: 7, border: "1px solid #e2e8f0",
+            background: "#f8fafc", fontSize: 12, color: "#1e293b", cursor: "pointer", minWidth: 120,
+          }}>
+            {CATEGORIES.map(o => <option key={o}>{o}</option>)}
+          </select>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, whiteSpace: "nowrap" }}>Template</span>
+          <select value={template} onChange={e => setTemplate(e.target.value)} style={{
+            padding: "6px 12px", borderRadius: 7, border: "1px solid #e2e8f0",
+            background: "#f8fafc", fontSize: 12, color: "#1e293b", cursor: "pointer", minWidth: 165,
+          }}>
+            {TEMPLATES.map(o => <option key={o}>{o}</option>)}
+          </select>
+        </div>
+
+        <button style={{
+          background: "#1e3a5f", color: "#fff", border: "none",
+          borderRadius: 7, padding: "7px 18px", cursor: "pointer",
+          fontSize: 12, fontWeight: 600, whiteSpace: "nowrap"
+        }}>💾 Save Draft</button>
+      </div>
+
+      {/* ── 3-Column Row ── */}
+      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+
+        {/* Left — AI Chat */}
+        <div style={{
+          width: 250, background: "#fff", borderRight: "1px solid #e2e8f0",
+          padding: "16px", display: "flex", flexDirection: "column",
+          flexShrink: 0, minHeight: 0,
+        }}>
+          <AIChat cvData={cvData} onCVUpdate={setCvData} />
+        </div>
+
+        {/* Center — CV Preview + Edit Button */}
+        <div style={{ flex: 1, background: "#f8fafc", overflowY: "auto", padding: "24px 28px" }}>
+
+          {/* Edit / Done button below top bar, above preview */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+            <button
+              onClick={() => setEditMode(p => !p)}
+              style={{
+                background: editMode ? "#f59e0b" : "#fff",
+                color: editMode ? "#fff" : "#1e3a5f",
+                border: editMode ? "none" : "1.5px solid #1e3a5f",
+                borderRadius: 8, padding: "7px 18px",
+                cursor: "pointer", fontSize: 12, fontWeight: 600,
+                display: "flex", alignItems: "center", gap: 6,
+                boxShadow: "0 1px 4px #0001", transition: "all 0.15s"
+              }}>
+              {editMode ? "✅ Done Editing" : "✏ Edit CV"}
             </button>
-          ))}
-          <div className="nav-bottom">
-            <button className="icon-btn" style={{ color: "#94a3b8" }} title="Notifications">
-              <Icon d={Icons.bell} size={17} />
-            </button>
-            <button className="icon-btn" style={{ color: "#94a3b8" }} title="Mail">
-              <Icon d={Icons.mail} size={17} />
-            </button>
-            <div className="avatar" title="John Doe">JD</div>
+          </div>
+
+          {/* CV Preview */}
+          <div style={{
+            background: "#fff", borderRadius: 12,
+            boxShadow: editMode ? "0 0 0 2px #f59e0b, 0 4px 24px #0000000d" : "0 4px 24px #0000000d",
+            overflow: "hidden", transition: "box-shadow 0.2s"
+          }}>
+            <CVPreview
+              data={cvData}
+              onDataChange={setCvData}
+              fontFamily={fontFamily}
+              fontSize={fontSize}
+              accentColor={accentColor}
+              editMode={editMode}
+            />
           </div>
         </div>
 
-        {/* \u2500\u2500 Main \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
-        <div className="main">
-          {/* Topbar */}
-          <div className="topbar">
-            <div className="breadcrumb">
-              Dashboard <span style={{ color: "#94a3b8" }}>/</span>
-              <span>Editing Document</span>
-            </div>
-            <div style={{ width: 14, height: 14, border: "2px solid #3b82f6", borderTopColor: "transparent", borderRadius: "50%", animation: generating ? "spin 0.7s linear infinite" : "none" }} />
-            <div className="topbar-right">
-              <button className="icon-btn" title="Edit" onClick={() => setEditMode(e => !e)}>
-                <Icon d={Icons.edit} size={16} />
-              </button>
-              <button className="icon-btn" title="Share">
-                <Icon d={Icons.share} size={16} />
-              </button>
-              <button className="icon-btn" title="Export" onClick={() => setShowExport(e => !e)}>
-                <Icon d={Icons.download} size={16} />
-              </button>
+        {/* Right — Export */}
+        <div style={{
+          width: 230, background: "#fff", borderLeft: "1px solid #e2e8f0",
+          padding: "20px 16px", flexShrink: 0, overflowY: "auto"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: 15, color: "#1e293b" }}>Export Document</span>
+            <span style={{ cursor: "pointer", color: "#94a3b8", fontSize: 18 }}>×</span>
+          </div>
+
+          <SelectField label="Theme" value={theme} onChange={setTheme} options={THEMES} />
+          <SelectField label="Font Family" value={fontFamily} onChange={setFontFamily} options={FONT_FAMILIES} />
+          <SelectField label="Font Size" value={fontSize} onChange={setFontSize} options={FONT_SIZES} />
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Color Scheme</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {COLOR_SCHEMES.map(c => (
+                <div key={c} onClick={() => setAccentColor(c)} style={{
+                  width: 24, height: 24, borderRadius: 6, background: c, cursor: "pointer",
+                  border: accentColor === c ? "2.5px solid #1e3a5f" : "2px solid transparent",
+                  outline: accentColor === c ? "2px solid #93c5fd" : "none",
+                  transition: "all 0.15s"
+                }} />
+              ))}
             </div>
           </div>
 
-          <div className="content">
-            {/* \u2500\u2500 Editor Panel \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
-            <div className="editor-panel">
-              <div className="panel-section">
-                <div className="panel-label">Document Type</div>
-                <div className="select-row">
-                  <select className="custom-select" value={category} onChange={e => setCategory(e.target.value)}>
-                    {["CV", "Resume", "Cover Letter", "Portfolio"].map(c => <option key={c}>{c}</option>)}
-                  </select>
-                  <select className="custom-select" value={template} onChange={e => setTemplate(e.target.value)}>
-                    {TEMPLATES.map(t => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
+          <div style={{
+            border: "1px solid #e2e8f0", borderRadius: 8,
+            overflow: "hidden", marginBottom: 14, height: 110, position: "relative"
+          }}>
+            <div style={{ transform: "scale(0.33)", transformOrigin: "top left", width: "303%", pointerEvents: "none" }}>
+              <CVPreview data={cvData} onDataChange={() => {}} fontFamily={fontFamily} fontSize={fontSize} accentColor={accentColor} editMode={false} />
+            </div>
+          </div>
 
-              <div className="panel-section">
-                <div className="panel-label">Prompts</div>
-                <input className="prompt-input" placeholder="Full Name"
-                  value={prompts.name}
-                  onChange={e => setPrompts(p => ({ ...p, name: e.target.value }))} />
-                <input className="prompt-input" placeholder="Job Title"
-                  value={prompts.title}
-                  onChange={e => setPrompts(p => ({ ...p, title: e.target.value }))} />
-              </div>
+          <button style={{
+            width: "100%", background: "#16a34a", color: "#fff",
+            border: "none", borderRadius: 8, padding: "11px 0",
+            cursor: "pointer", fontSize: 13, fontWeight: 700,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+          }}>⬇ Download PDF</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-              <div className="panel-section">
-                <div className="panel-label">Prompts</div>
-                <input className="prompt-input" placeholder="Full Name"
-                  value={prompts.name} readOnly style={{ opacity: 0.6 }} />
-                <select className="custom-select" style={{ marginBottom: 10 }}
-                  value={prompts.section}
-                  onChange={e => setPrompts(p => ({ ...p, section: e.target.value }))}>
-                  {["Professional Experience", "Summary", "Key Skills", "Education"].map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
+function Dashboard({ onNavigate }) {
+  const docs = [
+    { title: "Michael Ochieng - CV", template: "Modern Professional", date: "Mar 1, 2026" },
+    { title: "Cover Letter - Tech Solutions", template: "Classic Elegant", date: "Feb 28, 2026" },
+  ];
+  return (
+    <div style={{ padding: "32px 40px" }}>
+      <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1e3a5f", marginBottom: 4 }}>Dashboard</h2>
+      <p style={{ color: "#64748b", marginBottom: 28 }}>Welcome back! Manage your documents below.</p>
+      <div style={{ display: "flex", gap: 16, marginBottom: 32 }}>
+        {[["Total Docs", "2"], ["Templates", "4"], ["Exports", "1"]].map(([label, val]) => (
+          <div key={label} style={{
+            flex: 1, background: "#fff", border: "1px solid #e2e8f0",
+            borderRadius: 12, padding: "20px 24px", boxShadow: "0 1px 4px #0001"
+          }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#1e3a5f" }}>{val}</div>
+            <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <span style={{ fontWeight: 700, color: "#1e3a5f" }}>Recent Documents</span>
+        <button onClick={() => onNavigate("create")} style={{
+          background: "#1e3a5f", color: "#fff", border: "none",
+          borderRadius: 8, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600
+        }}>+ New Document</button>
+      </div>
+      {docs.map((d, i) => (
+        <div key={i} style={{
+          background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10,
+          padding: "14px 20px", marginBottom: 10,
+          display: "flex", justifyContent: "space-between", alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontWeight: 600, color: "#1e293b" }}>{d.title}</div>
+            <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>{d.template} · {d.date}</div>
+          </div>
+          <button onClick={() => onNavigate("create")} style={{
+            background: "#f1f5f9", border: "none", borderRadius: 6,
+            padding: "6px 14px", cursor: "pointer", fontSize: 12, color: "#475569"
+          }}>Edit</button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-              <div className="panel-section">
-                <div className="panel-label" style={{ marginBottom: 6 }}>Professional Experience</div>
-                <p className="section-hint">
-                  Describe your relevant work experience, emphasizing your key achievements and responsibilities in each role. This will be rewritten and refined to avoid redundancy.
-                </p>
+export default function AdaptDoc() {
+  const [activeTab, setActiveTab] = useState("create");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-                <button className="btn-primary" onClick={handleRegenerate} disabled={generating}>
-                  {generating ? <><div className="spinner" /> Regenerating\u2026</> : <><Icon d={Icons.refresh} size={14} /> Regenerate</>}
-                </button>
-                <button className="btn-secondary" onClick={() => setEditMode(e => !e)}>
-                  <Icon d={Icons.edit} size={14} /> {editMode ? "Close Editor" : "Edit Content"}
-                </button>
-              </div>
+  return (
+    <div style={{
+      display: "flex", height: "100vh",
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+      background: "#f1f5f9", overflow: "hidden"
+    }}>
+      <div style={{
+        width: sidebarOpen ? 210 : 56, background: "#1e3a5f",
+        display: "flex", flexDirection: "column",
+        transition: "width 0.2s ease", overflow: "hidden", flexShrink: 0
+      }}>
+        <div style={{
+          padding: "16px 14px", display: "flex", alignItems: "center", gap: 10,
+          borderBottom: "1px solid #ffffff20"
+        }}>
+          <div style={{
+            width: 30, height: 30, background: "#3b82f6", borderRadius: 8,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontWeight: 800, fontSize: 14, flexShrink: 0
+          }}>AT</div>
+          {sidebarOpen && <span style={{ color: "#fff", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>AdaptDoc</span>}
+        </div>
 
-              {editMode && (
-                <div className="panel-section">
-                  <div className="panel-label">Quick Edit</div>
-                  <textarea className="prompt-input" rows={4}
-                    style={{ resize: "vertical", lineHeight: 1.5 }}
-                    value={cv.summary}
-                    onChange={e => setCv(prev => ({ ...prev, summary: e.target.value }))}
-                    placeholder="Edit summary\u2026"
-                  />
-                  <input className="prompt-input" value={cv.name}
-                    onChange={e => setCv(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Full name" />
-                  <input className="prompt-input" value={cv.title}
-                    onChange={e => setCv(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Job title" />
-                </div>
-              )}
+        <nav style={{ flex: 1, padding: "12px 8px" }}>
+          {SIDEBAR_ITEMS.map(item => (
+            <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 10px", marginBottom: 2,
+              background: activeTab === item.id ? "#ffffff20" : "transparent",
+              border: "none",
+              borderLeft: activeTab === item.id ? "3px solid #60a5fa" : "3px solid transparent",
+              borderRadius: 8, cursor: "pointer",
+              color: activeTab === item.id ? "#fff" : "#93c5fd",
+              fontSize: 13, fontWeight: activeTab === item.id ? 600 : 400,
+              textAlign: "left", whiteSpace: "nowrap",
+              transition: "all 0.15s"
+            }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>{item.icon}</span>
+              {sidebarOpen && item.label}
+            </button>
+          ))}
+        </nav>
 
-              <div className="panel-section" style={{ marginTop: "auto" }}>
-                <button className="btn-save" onClick={handleSaveDraft}>
-                  <Icon d={Icons.save} size={14} /> Save Draft
-                </button>
+        <div style={{
+          padding: "12px 10px", borderTop: "1px solid #ffffff20",
+          display: "flex", alignItems: "center", gap: 10
+        }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: "50%", background: "#3b82f6",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontSize: 12, fontWeight: 700, flexShrink: 0
+          }}>MO</div>
+          {sidebarOpen && <span style={{ color: "#93c5fd", fontSize: 12 }}>Michael Ochieng</span>}
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{
+          background: "#fff", borderBottom: "1px solid #e2e8f0",
+          padding: "0 20px", height: 50,
+          display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={() => setSidebarOpen(p => !p)} style={{
+              background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#64748b"
+            }}>☰</button>
+            <span style={{ fontWeight: 700, color: "#1e3a5f", fontSize: 15 }}>AdaptDoc</span>
+          </div>
+          <div style={{ display: "flex", gap: 14, color: "#94a3b8", fontSize: 16 }}>
+            <span style={{ cursor: "pointer" }}>✉</span>
+            <span style={{ cursor: "pointer" }}>🔔</span>
+            <span style={{ cursor: "pointer" }}>⬡</span>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {activeTab === "dashboard" && <Dashboard onNavigate={setActiveTab} />}
+          {activeTab === "create" && <CreateDocument />}
+          {activeTab === "documents" && (
+            <div style={{ padding: 40 }}>
+              <h2 style={{ color: "#1e3a5f", marginBottom: 8 }}>My Documents</h2>
+              <p style={{ color: "#64748b" }}>Your saved documents will appear here.</p>
+            </div>
+          )}
+          {activeTab === "templates" && (
+            <div style={{ padding: 40 }}>
+              <h2 style={{ color: "#1e3a5f", marginBottom: 16 }}>Templates</h2>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                {TEMPLATES.map(t => (
+                  <div key={t} style={{
+                    background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12,
+                    padding: "20px 24px", width: 180, cursor: "pointer", boxShadow: "0 1px 4px #0001"
+                  }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>📄</div>
+                    <div style={{ fontWeight: 600, color: "#1e293b", fontSize: 13 }}>{t}</div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* \u2500\u2500 Preview \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
-            <div className="preview-area">
-              <div className="preview-scroll">
-                <div className={generating ? "generating" : ""}>
-                  <CVPreview cv={cv} theme={theme} fontFamily={fontFamily} fontSize={fontSize} template={template} />
-                </div>
-              </div>
+          )}
+          {activeTab === "settings" && (
+            <div style={{ padding: 40 }}>
+              <h2 style={{ color: "#1e3a5f", marginBottom: 8 }}>Settings</h2>
+              <p style={{ color: "#64748b" }}>Account settings and preferences.</p>
             </div>
-
-            {/* \u2500\u2500 Export Panel \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
-            {showExport && (
-              <div className="export-panel">
-                <div className="export-header">
-                  <span className="export-title">Export Document</span>
-                  <button className="icon-btn" onClick={() => setShowExport(false)}>
-                    <Icon d={Icons.close} size={15} />
-                  </button>
-                </div>
-
-                <div className="export-section">
-                  <div className="panel-label">Theme</div>
-                  <select className="custom-select" style={{ width: "100%", marginTop: 6 }}
-                    value={theme} onChange={e => setTheme(e.target.value)}>
-                    {Object.keys(THEMES).map(t => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
-
-                <div className="export-section">
-                  <div className="panel-label">Font Family</div>
-                  <select className="custom-select" style={{ width
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
