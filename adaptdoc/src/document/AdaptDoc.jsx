@@ -706,6 +706,8 @@ function CreateDocument() {
         <button style={{ background:"#1e3a5f", color:"#fff", border:"none", borderRadius:7, padding:"7px 18px", cursor:"pointer", fontSize:12, fontWeight:600, whiteSpace:"nowrap" }}>💾 Save Draft</button>
       </div>
 
+      
+      
       <div style={{ display:"flex", flex:1, minHeight:0 }}>
         <div style={{ width:250, background:"#fff", borderRight:"1px solid #e2e8f0", padding:"16px", display:"flex", flexDirection:"column", flexShrink:0, minHeight:0 }}>
           <AIChat cvData={cvData} onCVUpdate={setCvData} />
@@ -731,10 +733,10 @@ function CreateDocument() {
             </div>
 
             {/* Theme cards replacing old dropdown */}
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:11, fontWeight:600, color:"#64748b", marginBottom:8, textTransform:"uppercase", letterSpacing:0.5 }}>Theme</div>
-              {THEMES.map(t=><ThemeCard key={t} name={t} selected={theme===t} onClick={()=>setTheme(t)} />)}
-            </div>
+             <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Theme</div>
+          {THEME_LIST.map(t=><ThemeCard key={t} name={t} selected={theme===t} onClick={()=>setTheme(t)} />)}
+             </div>
 
             <SelectField label="Font Size" value={fontSize} onChange={setFontSize} options={FONT_SIZES} />
 
@@ -755,10 +757,10 @@ function CreateDocument() {
             </div>
 
             <button onClick={handleDownloadPDF} disabled={pdfLoading} style={{ width:"100%", background:pdfLoading?"#86efac":"#16a34a", color:"#fff", border:"none", borderRadius:8, padding:"11px 0", cursor:pdfLoading?"not-allowed":"pointer", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", gap:6, transition:"background 0.2s" }}>
-              {pdfLoading?"⏳ Generating...":"⬇ Download PDF"}
+              {pdfLoading?"⏳ Downloading...":"⬇ Download PDF"}
             </button>
             <button onClick={handleDownloadWord} disabled={wordLoading} style={{ width:"100%", background:wordLoading?"#93c5fd":"#2563eb", color:"#fff", border:"none", borderRadius:8, padding:"11px 0", cursor:wordLoading?"not-allowed":"pointer", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", gap:6, marginTop:8, transition:"background 0.2s" }}>
-              {wordLoading?"⏳ Generating...":"📝 Download Word"}
+              {wordLoading?"⏳ Downloading...":"📝 Download Word"}
             </button>
           </div>
         ) : (
